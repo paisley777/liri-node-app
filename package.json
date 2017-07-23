@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/paisley777/liri-node-app/issues"
   },
-  "homepage": "https://github.com/paisley777/liri-node-app#readme"
+  "homepage": "https://github.com/paisley777/liri-node-app#readme",
+  "dependencies": {
+    "node-spotify-api": "^1.0.5",
+    "node-twitter-api": "^1.8.0",
+    "request": "^2.81.0",
+    "twitter": "^1.7.1"
+  }
 }
