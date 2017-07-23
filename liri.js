@@ -1,51 +1,54 @@
-
 //NPM packages required
 var request = require('request');
-var twitterAPI = require('node-twitter-api');
-var fs = require("fs");
-
+var fs = require('fs');
+var keys = require("./keys");
+var twitterApi = require('node-twitter-api');
+var Spotify = require('node-spotify-api');
+ 
 //Global variables
-var action = '';
-var title = '';
+var action = process.argv[2];
+
+var spotify = new Spotify({
+   id: keys.spotifyKeys.id,
+   secret: keys.spotifyKeys.secret,
+});
 
 /****EVENTS****/
-
-defineAction();
-console.log(action);
 
 if (action === 'my-tweets') {
     console.log('Show 20 tweets');
 } 
 else if (action === 'spotify-this-song') {
-    console.log('Spotify!');
+    var title = 'Cinnamon Girl';
+    spotify.search({type: 'track', query: 'Purple Rain Prince'}, function(err, data) {
+        if (err) {
+            return console.log('Error occurred: ' + err);
+        }
+        console.log('\nArtist(s): ' + data.tracks.items[0].artists[0].name +
+                    '\nSong Name: ' + data.tracks.items[0].name +
+                    '\nSpotify Preview Link: ' + data.tracks.items[0].preview_url +
+                    '\nAlbum: ' + data.tracks.items[0].album.name)
+        //console.log(data.tracks.items[0]); 
+    });
 } 
 else if (action === 'movie-this') {
-    if ((process.argv[2] === 'movie-this') && (process.argv[3] === undefined)) {
+    if (process.argv[3] === undefined) {
         getDefaultMovieData();
     } else {
+        title = process.argv[3];
         callMovieApi();
     }
 } 
-// else if (action === 'do-what-it-says') {
-//     console.log('Do what it says!')
-// } 
-// else {
-//     console.log('That\'s not a recognized command!')
-// };
+else if (action === 'do-what-it-says') {
+    getDataFromTextFile();  
+} 
+else {
+    console.log('That\'s not a recognized command!')
+};
 
 
 
 //FUNCTIONS
-
-//Determine which action will be executed
-function defineAction() {
-    if (process.argv[2] === 'do-what-it-says') {
-        getDataFromTextFile();
-    } else {
-        action = process.argv[2];
-        title = process.argv[3];
-    }
-}
 
 function getDataFromTextFile(){
     fs.readFile("random.txt", "utf8", function(error, data) {
@@ -56,7 +59,21 @@ function getDataFromTextFile(){
         var dataArr = data.split(",");
         action = dataArr[0];
         title = dataArr[1];
-        console.log('\nAction: ' + action + '\nTitle: ' + title);
+        console.log('\nAction: ' + action + '\nTitle: ' + title); 
+
+        if (action === 'my-tweets') {
+            console.log('Show 20 tweets');
+        } 
+        else if (action === 'spotify-this-song') {
+            console.log('Spotify!');
+        } 
+        else if (action === 'movie-this') {
+            if (title === undefined) {
+                getDefaultMovieData();
+            } else {
+                callMovieApi();
+            }
+        } 
     });
 }
 
@@ -117,3 +134,13 @@ function callMovieApi() {
 // );
 
 
+
+//Determine which action will be executed
+// function defineAction() {
+//     if (process.argv[2] === 'do-what-it-says') {
+//         getDataFromTextFile();
+//     } else {
+//         action = process.argv[2];
+//         title = process.argv[3];
+//     }
+// }
