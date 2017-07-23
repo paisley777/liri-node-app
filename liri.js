@@ -19,17 +19,12 @@ if (action === 'my-tweets') {
     console.log('Show 20 tweets');
 } 
 else if (action === 'spotify-this-song') {
-    var title = 'Cinnamon Girl';
-    spotify.search({type: 'track', query: 'Purple Rain Prince'}, function(err, data) {
-        if (err) {
-            return console.log('Error occurred: ' + err);
-        }
-        console.log('\nArtist(s): ' + data.tracks.items[0].artists[0].name +
-                    '\nSong Name: ' + data.tracks.items[0].name +
-                    '\nSpotify Preview Link: ' + data.tracks.items[0].preview_url +
-                    '\nAlbum: ' + data.tracks.items[0].album.name)
-        //console.log(data.tracks.items[0]); 
-    });
+    if (process.argv[3] === undefined) {
+        getDefaultSongData();
+    } else {
+        title = process.argv[3];
+        searchSpotify();
+    };
 } 
 else if (action === 'movie-this') {
     if (process.argv[3] === undefined) {
@@ -48,7 +43,7 @@ else {
 
 
 
-//FUNCTIONS
+/****FUNCTIONS****/
 
 function getDataFromTextFile(){
     fs.readFile("random.txt", "utf8", function(error, data) {
@@ -65,7 +60,11 @@ function getDataFromTextFile(){
             console.log('Show 20 tweets');
         } 
         else if (action === 'spotify-this-song') {
-            console.log('Spotify!');
+            if (title === undefined) {
+                getDefaultSongData();
+            } else {
+                searchSpotify();
+            }
         } 
         else if (action === 'movie-this') {
             if (title === undefined) {
@@ -74,6 +73,23 @@ function getDataFromTextFile(){
                 callMovieApi();
             }
         } 
+    });
+}
+
+function getDefaultSongData() {
+    title = 'The Sign Ace of Base';
+    searchSpotify();
+};
+
+function searchSpotify() {
+    spotify.search({type: 'track', query: title}, function(err, data) {
+        if (err) {
+            return console.log('Error occurred: ' + err);
+        }
+        console.log('\nArtist(s): ' + data.tracks.items[0].artists[0].name +
+                    '\nSong Name: ' + data.tracks.items[0].name +
+                    '\nSpotify Preview Link: ' + data.tracks.items[0].preview_url +
+                    '\nAlbum: ' + data.tracks.items[0].album.name);
     });
 }
 
