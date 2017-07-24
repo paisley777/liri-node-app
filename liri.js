@@ -8,12 +8,15 @@ var keys = require("./keys");
 
 //Require the Twitter package, create a new twitter object, and assign keys to it
 var twitterAPI = require('node-twitter-api');
-var twitter = new twitterAPI({
+var myTwitter = new twitterAPI({
     consumerKey: keys.twitterKeys.consumer_key,
-    consumerSecret: keys.twitterKeys.consumer_secret,
-    accessToken: keys.twitterKeys.access_token_key,
-    accessTokenSecret: keys.twitterKeys.access_token_secret,
+    consumerSecret: keys.twitterKeys.consumer_secret
 });
+
+var myTwitterTokens = {
+    accessToken: keys.twitterKeys.access_token_key,
+    accessTokenSecret: keys.twitterKeys.access_token_secret
+};
 
 //Require the spotify package, create a new spotify object, and assign keys to it
 var Spotify = require('node-spotify-api');
@@ -29,7 +32,6 @@ var action = process.argv[2];
 
 //Execute functions dependent on the action specified by the user
 if (action === 'my-tweets') {
-    console.log('Show tweets');
     getTweets();
 } 
 else if (action === 'spotify-this-song') {
@@ -72,7 +74,6 @@ function getDataFromTextFile(){
         title = dataArr[1];
 
         if (action === 'my-tweets') {
-            console.log('Show tweets');
             getTweets();
         } 
         else if (action === 'spotify-this-song') {
@@ -92,19 +93,23 @@ function getDataFromTextFile(){
     });
 }
 
-//Call the Twitter API and return tweets (still trying to get this to work)
+//Call the Twitter API and return tweets
 function getTweets() {
-    twitter.statuses('home_timeline', {
+    //myTwitter.statuses('home_timeline', {
+    myTwitter.getTimeline('home_timeline', {
             count: '20',
             screen_name: 'nustudent319'
         },
-        twitter.accessToken,
-        twitter.accessTokenSecret,
+        myTwitterTokens.accessToken,
+        myTwitterTokens.accessTokenSecret,
         function(error, data, response) {
             if (error) {
-                console.log('There\'s an error.'); 
+                console.log('There\'s an error: ' + error); 
             } else {
-                console.log(response);
+                console.log('RECENT TWEETS:')
+                for (i=0; i<data.length; i++) {
+                    console.log(data[i].text);
+                } 
             }
         }
     );
