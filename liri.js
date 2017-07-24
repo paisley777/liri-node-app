@@ -1,22 +1,36 @@
-//NPM packages required
+//Use request to grab data from OMDB
 var request = require('request');
-var fs = require('fs');
-var keys = require("./keys");
-var twitterApi = require('node-twitter-api');
-var Spotify = require('node-spotify-api');
- 
-//Global variables
-var action = process.argv[2];
 
+var fs = require('fs');
+
+//Keys needed to use Twitter and Spotify packages
+var keys = require("./keys");
+
+//Require the Twitter package, create a new twitter object, and assign keys to it
+var twitterAPI = require('node-twitter-api');
+var twitter = new twitterAPI({
+    consumerKey: keys.twitterKeys.consumer_key,
+    consumerSecret: keys.twitterKeys.consumer_secret,
+    accessToken: keys.twitterKeys.access_token_key,
+    accessTokenSecret: keys.twitterKeys.access_token_secret,
+});
+
+//Require the spotify package, create a new spotify object, and assign keys to it
+var Spotify = require('node-spotify-api');
 var spotify = new Spotify({
    id: keys.spotifyKeys.id,
    secret: keys.spotifyKeys.secret,
 });
 
+//Variable to store the action specified by the user
+var action = process.argv[2];
+
 /****EVENTS****/
 
+//Execute functions dependent on the action specified by the user
 if (action === 'my-tweets') {
-    console.log('Show 20 tweets');
+    console.log('Show tweets');
+    getTweets();
 } 
 else if (action === 'spotify-this-song') {
     if (process.argv[3] === undefined) {
@@ -45,19 +59,21 @@ else {
 
 /****FUNCTIONS****/
 
+//Read text in the random.txt file and execute the appropriate function based on its content
 function getDataFromTextFile(){
     fs.readFile("random.txt", "utf8", function(error, data) {
         // If the code experiences any errors it will log the error to the console.
         if (error) {
             return console.log(error);
         }
+        //Split text string in data file into an array
         var dataArr = data.split(",");
         action = dataArr[0];
         title = dataArr[1];
-        console.log('\nAction: ' + action + '\nTitle: ' + title); 
 
         if (action === 'my-tweets') {
-            console.log('Show 20 tweets');
+            console.log('Show tweets');
+            getTweets();
         } 
         else if (action === 'spotify-this-song') {
             if (title === undefined) {
@@ -76,11 +92,31 @@ function getDataFromTextFile(){
     });
 }
 
+//Call the Twitter API and return tweets (still trying to get this to work)
+function getTweets() {
+    twitter.statuses('home_timeline', {
+            count: '20',
+            screen_name: 'nustudent319'
+        },
+        twitter.accessToken,
+        twitter.accessTokenSecret,
+        function(error, data, response) {
+            if (error) {
+                console.log('There\'s an error.'); 
+            } else {
+                console.log(response);
+            }
+        }
+    );
+}
+
+//Return default song data if the user specifies the spotify action but no song title
 function getDefaultSongData() {
     title = 'The Sign Ace of Base';
     searchSpotify();
 };
 
+//Search spotify for the user's song choice
 function searchSpotify() {
     spotify.search({type: 'track', query: title}, function(err, data) {
         if (err) {
@@ -93,7 +129,7 @@ function searchSpotify() {
     });
 }
 
-//Show data for the movie "Mr. Nobody" without user movie title input
+//Show default movie data for "Mr. Nobody" if the user chooses the movie action but no movie title
 function getDefaultMovieData() {
     title = 'Mr. Nobody';
     console.log('\nIf you haven\'t watched "Mr. Nobody," then you should: http//www.imdb.com/title/tt0485947/'
@@ -101,7 +137,7 @@ function getDefaultMovieData() {
     callMovieApi(); 
 };
 
-//Request movie data from OMDB
+//Request movie data from OMDB using the movie title specified by the user
 function callMovieApi() {
     var queryUrl = "http://www.omdbapi.com/?t=" + title + "&y=&plot=short&apikey=40e9cece";
     request(queryUrl, function(error, response, body) {
@@ -126,37 +162,6 @@ function callMovieApi() {
 
 
 
-//TWITTER
-
-// var twitter = new twitterAPI({
-//     consumerKey: exports.twitterKeys.consumer_key,
-//     consumerSecret: exports.twitterKeys.consumer_secret,
-// });
-
-// console.log(twitter.consumerKey);
-
-// twitter.statuses("update", {
-//         status: "Hello world!"
-//     },
-//     accessToken,
-//     accessTokenSecret,
-//     function(error, data, response) {
-//         if (error) {
-//             // something went wrong 
-//         } else {
-//             // data contains the data sent by twitter 
-//         }
-//     }
-// );
 
 
 
-//Determine which action will be executed
-// function defineAction() {
-//     if (process.argv[2] === 'do-what-it-says') {
-//         getDataFromTextFile();
-//     } else {
-//         action = process.argv[2];
-//         title = process.argv[3];
-//     }
-// }
